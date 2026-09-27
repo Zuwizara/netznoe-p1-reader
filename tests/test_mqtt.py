@@ -50,6 +50,7 @@ def test_discovery_uses_one_device_and_correct_energy_metadata() -> None:
     topic = "homeassistant/sensor/meter_main/energy_import_wh/config"
     payload = json.loads(messages[topic])
     assert payload["unique_id"] == "meter_main_energy_import_wh"
+    assert payload["name"] == "Energy import"
     assert payload["device"]["identifiers"] == ["meter_main"]
     assert payload["device_class"] == "energy"
     assert payload["state_class"] == "total_increasing"

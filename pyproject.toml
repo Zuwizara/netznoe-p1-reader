@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "netznoe-p1-reader"
-version = "0.1.0"
+version = "0.1.1"
 description = "Read encrypted Netz NÖ P1 smart-meter data and publish it via MQTT."
 readme = "README.md"
 requires-python = ">=3.11"

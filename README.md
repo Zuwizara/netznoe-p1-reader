@@ -1,6 +1,6 @@
 # netznoe-p1-reader
 
-Deutsch | [English](README.en.md)
+[Deutsch](README.de.md) | English
 
 [![CI](https://github.com/Zuwizara/netznoe-p1-reader/actions/workflows/ci.yml/badge.svg)](https://github.com/Zuwizara/netznoe-p1-reader/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/tag/Zuwizara/netznoe-p1-reader)](https://github.com/Zuwizara/netznoe-p1-reader/tags)
@@ -8,41 +8,40 @@ Deutsch | [English](README.en.md)
 [![License](https://img.shields.io/github/license/Zuwizara/netznoe-p1-reader)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi-C51A4A?logo=raspberrypi)](https://www.raspberrypi.com/)
 
-Ein dauerhaft laufender Python-Dienst für den Raspberry Pi. Er liest die
-verschlüsselte P1-Kundenschnittstelle eines Netz-NÖ-Smart-Meters, entschlüsselt
-DLMS/COSEM-Daten und veröffentlicht alle Messwerte über MQTT. Home Assistant
-MQTT Discovery ist integriert.
+A long-running Python service for Raspberry Pi. It reads the encrypted P1
+customer interface of a Netz NÖ smart meter, decrypts its DLMS/COSEM data and
+publishes all measurements over MQTT. Home Assistant MQTT Discovery is built
+in.
 
-Der erste Release unterstützt den Kaifa MA309 von Netz NÖ. Der Dienst läuft
-ohne Root-Rechte und gibt weder den persönlichen GUEK noch vollständige Frames
-im Log aus.
+The first release supports the Netz NÖ Kaifa MA309. The service runs without
+root privileges and never logs the personal GUEK or complete frames.
 
-## Voraussetzungen
+## Requirements
 
-- Raspberry Pi mit Raspberry Pi OS oder einem vergleichbaren Debian-System
-- Python 3.11 oder neuer
-- Kaifa MA309 mit aktivierter P1-Kundenschnittstelle
-- persönlicher 32-stelliger GUEK von Netz NÖ
-- echter wired-M-Bus-zu-USB-Konverter; ein USB-UART-Adapter genügt nicht
-- erreichbarer MQTT-Broker
-- optional Home Assistant mit eingerichteter MQTT-Integration
+- Raspberry Pi with Raspberry Pi OS or a comparable Debian system
+- Python 3.11 or newer
+- Kaifa MA309 with its P1 customer interface enabled
+- personal 32-character GUEK from Netz NÖ
+- a genuine wired M-Bus-to-USB converter; a USB UART adapter is not sufficient
+- an accessible MQTT broker
+- optionally, Home Assistant with the MQTT integration configured
 
-Laut Netz-NÖ-Dokumentation liegen am RJ12-Anschluss `MBUS1 (+)` auf Pin 3 und
-`MBUS2 (-)` auf Pin 4. Die Vorgaben von Netz NÖ und des Adapterherstellers sind
-zu beachten.
+According to the Netz NÖ documentation, the RJ12 connector uses pin 3 for
+`MBUS1 (+)` and pin 4 for `MBUS2 (-)`. Follow the instructions from Netz NÖ and
+the adapter manufacturer.
 
-### Getesteter M-Bus-Adapter
+### Tested M-Bus adapter
 
-Der Hardwaretest erfolgte mit dem
-[Tedbear USB-M-Bus-Master/Slave-Adapter, ASIN B0827DSGTD](https://www.amazon.de/dp/B0827DSGTD).
-Das ist ein Erfahrungswert, keine Kaufempfehlung oder Garantie für spätere
-Produktrevisionen.
+Hardware testing used the
+[Tedbear USB M-Bus Master/Slave adapter, ASIN B0827DSGTD](https://www.amazon.de/dp/B0827DSGTD).
+This is a test reference, not a purchase recommendation or a guarantee for
+later product revisions.
 
 ## Installation
 
-Die folgenden Befehle werden nicht automatisch ausgeführt.
+The commands below are not executed automatically.
 
-### 1. System vorbereiten
+### 1. Prepare the system
 
 ```console
 sudo apt update
@@ -50,9 +49,9 @@ sudo apt install --yes git python3 python3-venv
 python3 --version
 ```
 
-Die Python-Version muss mindestens `3.11` sein.
+Python must be version `3.11` or newer.
 
-### 2. Dienstkonto und Anwendung anlegen
+### 2. Create the service account and install the application
 
 ```console
 sudo useradd --system --user-group \
@@ -71,36 +70,35 @@ sudo -u netznoe-p1-reader \
   /opt/netznoe-p1-reader/src
 ```
 
-Mit `id netznoe-p1-reader` prüfen, ob die Gruppen
-`netznoe-p1-reader` und `dialout` eingetragen sind.
+Run `id netznoe-p1-reader` and verify that both `netznoe-p1-reader` and
+`dialout` are listed as groups.
 
-### 3. Seriellen Adapter finden
+### 3. Find the serial adapter
 
-Adapter einstecken und stabile Gerätenamen anzeigen:
+Plug in the adapter and list stable device names:
 
 ```console
 ls -l /dev/serial/by-id/
 ```
 
-Beispiel:
+Example:
 
 ```text
 /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A10XYZ-if00-port0
 ```
 
-Rechte und Geräte-Gruppe prüfen:
+Check its permissions and device group:
 
 ```console
-stat -Lc 'Gerät: %n  Gruppe: %G  Rechte: %A' \
+stat -Lc 'Device: %n  Group: %G  Permissions: %A' \
   /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A10XYZ-if00-port0
 ```
 
-Ein Pfad unter `/dev/serial/by-id/` bleibt normalerweise auch nach Neustarts
-stabil. Falls kein solcher Eintrag existiert, kann vorläufig `/dev/ttyUSB0`
-verwendet werden. Weicht die Geräte-Gruppe von `dialout` ab, muss stattdessen
-diese Gruppe beim Dienstkonto ergänzt werden.
+A path below `/dev/serial/by-id/` normally remains stable across reboots. If
+there is no such entry, `/dev/ttyUSB0` can be used temporarily. If the device
+group is not `dialout`, add the service account to the group shown instead.
 
-### 4. Konfiguration anlegen
+### 4. Create the configuration
 
 ```console
 sudo install -o root -g netznoe-p1-reader -m 0640 \
@@ -109,44 +107,44 @@ sudo install -o root -g netznoe-p1-reader -m 0640 \
 sudoedit /etc/netznoe-p1-reader.env
 ```
 
-Mindestens diese Platzhalter ersetzen:
+Replace at least these placeholders:
 
-- `NETZNOE_P1_GUEK`: persönlicher GUEK, exakt 32 Hex-Zeichen
-- `NETZNOE_P1_SERIAL_PORT`: zuvor ermittelter Adapterpfad
-- `NETZNOE_P1_MQTT_HOST`, Benutzer und Passwort: MQTT-Zugang
-- `NETZNOE_P1_DEVICE_ID`: stabile ID, beispielsweise `zaehler_keller`
+- `NETZNOE_P1_GUEK`: personal GUEK, exactly 32 hexadecimal characters
+- `NETZNOE_P1_SERIAL_PORT`: the adapter path found above
+- `NETZNOE_P1_MQTT_HOST`, username and password: MQTT access details
+- `NETZNOE_P1_DEVICE_ID`: a stable ID, for example `meter_basement`
 
-Die `DEVICE_ID` später nicht ändern, sonst legt Home Assistant neue Entitäten
-an. Der echte GUEK gehört niemals in Git, Screenshots, Tickets oder Logs.
+Do not change `DEVICE_ID` later or Home Assistant will create new entities.
+Never put the real GUEK in Git, screenshots, tickets or logs.
 
-### 5. Konfiguration und Adapter prüfen
+### 5. Check the configuration and adapter
 
-Konfiguration prüfen, ohne Port oder Netzwerk zu öffnen:
+Validate the configuration without opening the port or network:
 
 ```console
 sudo -u netznoe-p1-reader sh -c \
   'set -a; . /etc/netznoe-p1-reader.env; exec /opt/netznoe-p1-reader/.venv/bin/netznoe-p1-reader --check-config'
 ```
 
-Erwartet wird `Configuration is valid`.
+The expected output is `Configuration is valid`.
 
-Anschließend bis zu 20 Sekunden auf einen gültigen M-Bus-Frame warten:
+Then wait up to 20 seconds for a valid M-Bus frame:
 
 ```console
 sudo -u netznoe-p1-reader sh -c \
   'set -a; . /etc/netznoe-p1-reader.env; exec /opt/netznoe-p1-reader/.venv/bin/netznoe-p1-reader --check-serial --check-serial-seconds 20'
 ```
 
-Erfolgreiche Beispielausgabe:
+Example success output:
 
 ```text
 serial check passed: valid 256-byte M-Bus frame received on /dev/serial/by-id/...
 ```
 
-Der Selbsttest benötigt weder GUEK noch MQTT und gibt keine Frameinhalte aus.
-Er prüft M-Bus-Header, doppelte Länge, Prüfsumme und Endbyte.
+This check needs neither the GUEK nor MQTT and does not print frame contents.
+It validates the M-Bus header, duplicate length, checksum and end byte.
 
-### 6. systemd-Dienst starten
+### 6. Start the systemd service
 
 ```console
 sudo install -o root -g root -m 0644 \
@@ -156,29 +154,29 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now netznoe-p1-reader.service
 ```
 
-Der Dienst läuft als `netznoe-p1-reader`, erhält seriellen Zugriff über
-`dialout`, startet beim Boot und wird nach Fehlern neu gestartet.
+The service runs as `netznoe-p1-reader`, gets serial access through `dialout`,
+starts at boot and restarts after failures.
 
-### 7. Betrieb prüfen
+### 7. Verify operation
 
 ```console
 systemctl status netznoe-p1-reader.service
 journalctl -u netznoe-p1-reader.service -f
 ```
 
-`Active: active (running)` zeigt einen laufenden Dienst. Im Normalbetrieb
-meldet das Log den geöffneten seriellen Port, die MQTT-Verbindung und
-entschlüsselte Messungen.
+`Active: active (running)` indicates a running service. During normal operation,
+the log reports the open serial port, MQTT connection and decrypted
+measurements.
 
-Im MQTT-Broker sollten folgende Daten erscheinen:
+The MQTT broker should receive:
 
-- `<topic-prefix>/availability`: retained Wert `online`
-- `<topic-prefix>/state`: ungefähr alle fünf Sekunden ein JSON-Datensatz
-- `<discovery-prefix>/sensor/...`: retained Home-Assistant-Konfiguration
+- `<topic-prefix>/availability`: retained value `online`
+- `<topic-prefix>/state`: a JSON data set about every five seconds
+- `<discovery-prefix>/sensor/...`: retained Home Assistant configuration
 
-Home Assistant legt daraus automatisch ein Gerät mit allen Sensoren an.
+Home Assistant automatically creates one device containing all sensors.
 
-## Update
+## Updating
 
 ```console
 sudo systemctl stop netznoe-p1-reader.service
@@ -193,61 +191,61 @@ systemctl status netznoe-p1-reader.service
 
 ## Troubleshooting
 
-- **Adapter wird nicht angezeigt:** USB-Verbindung prüfen und mit
-  `ls -l /dev/serial/by-id/` erneut suchen.
-- **`cannot open or read`:** Gerätepfad, Gruppe und Ausgabe von
-  `id netznoe-p1-reader` prüfen.
-- **`0 bytes received`:** P1-Aktivierung, RJ12-Verkabelung und
-  M-Bus-Pegelwandler prüfen.
-- **Bytes, aber kein gültiger Frame:** Baudrate 2400, 8N1, Signalpegel und
-  Verkabelung prüfen.
-- **Entschlüsselung schlägt fehl:** GUEK auf exakt 32 Hex-Zeichen und Zuordnung
-  zum richtigen Zähler prüfen.
-- **Keine MQTT-Daten:** Brokeradresse, Zugangsdaten, ACLs und bei TLS Uhrzeit,
-  Hostname und CA-Kette prüfen.
-- **Keine Home-Assistant-Sensoren:** MQTT-Integration, Discovery-Präfix und
-  Rechte für retained Discovery prüfen.
+- **Adapter is not shown:** check the USB connection and run
+  `ls -l /dev/serial/by-id/` again.
+- **`cannot open or read`:** check the device path, group and output of
+  `id netznoe-p1-reader`.
+- **`0 bytes received`:** check P1 activation, RJ12 wiring and the M-Bus level
+  converter.
+- **Bytes arrive, but no valid frame:** check 2400 baud, 8N1, signal levels and
+  wiring.
+- **Decryption fails:** ensure the GUEK has exactly 32 hexadecimal characters
+  and belongs to this meter.
+- **No MQTT data:** check broker address, credentials and ACLs; for TLS also
+  check time, hostname and CA chain.
+- **No Home Assistant sensors:** check the MQTT integration, discovery prefix
+  and permission to publish retained discovery messages.
 
-Echte Schlüssel oder Frames nicht in öffentliche Issues kopieren.
+Do not paste real keys or frames into public issues.
 
-## Konfigurationsreferenz
+## Configuration reference
 
-Alle Variablen beginnen mit `NETZNOE_P1_`.
+All variables start with `NETZNOE_P1_`.
 
-| Variable | Standard | Beschreibung |
+| Variable | Default | Description |
 | --- | --- | --- |
-| `GUEK` | erforderlich | 32 Hex-Zeichen / 16 Byte |
-| `SERIAL_PORT` | `/dev/ttyUSB0` | serieller M-Bus-Konverter |
-| `SERIAL_BAUDRATE` | `2400` | Baudrate; 8N1 ist fest |
-| `SERIAL_TIMEOUT_MS` | `1000` | Timeout für Teil-Frames |
-| `MQTT_HOST` | `localhost` | Brokername oder Adresse |
-| `MQTT_PORT` | `1883`, mit TLS `8883` | Brokerport |
-| `MQTT_USERNAME` | leer | optionaler Benutzer |
-| `MQTT_PASSWORD` | leer | optionales Passwort |
-| `MQTT_TOPIC_PREFIX` | `netznoe/p1` | State/Availability-Basis |
-| `DEVICE_ID` | Hostname-basiert | stabile, eindeutige ID |
-| `DEVICE_NAME` | `Netz NÖ Smart Meter` | Anzeigename |
-| `HA_DISCOVERY_PREFIX` | `homeassistant` | Discovery-Präfix |
-| `MQTT_TLS` | `false` | TLS aktivieren |
-| `MQTT_TLS_CA_CERT` | System-CAs | optionale private CA |
-| `LOG_LEVEL` | `INFO` | Python-Loglevel |
+| `GUEK` | required | 32 hexadecimal characters / 16 bytes |
+| `SERIAL_PORT` | `/dev/ttyUSB0` | serial M-Bus converter |
+| `SERIAL_BAUDRATE` | `2400` | baud rate; 8N1 is fixed |
+| `SERIAL_TIMEOUT_MS` | `1000` | timeout for partial frames |
+| `MQTT_HOST` | `localhost` | broker hostname or address |
+| `MQTT_PORT` | `1883`, with TLS `8883` | broker port |
+| `MQTT_USERNAME` | empty | optional username |
+| `MQTT_PASSWORD` | empty | optional password |
+| `MQTT_TOPIC_PREFIX` | `netznoe/p1` | state/availability base |
+| `DEVICE_ID` | based on hostname | stable, unique ID |
+| `DEVICE_NAME` | `Netz NÖ Smart Meter` | display name |
+| `HA_DISCOVERY_PREFIX` | `homeassistant` | discovery prefix |
+| `MQTT_TLS` | `false` | enable TLS |
+| `MQTT_TLS_CA_CERT` | system CAs | optional private CA |
+| `LOG_LEVEL` | `INFO` | Python log level |
 
-TLS prüft Zertifikate immer; es gibt keinen unsicheren Modus.
+TLS always verifies certificates; there is no insecure mode.
 
-## MQTT und Home Assistant
+## MQTT and Home Assistant
 
-Der Dienst hält genau eine Paho-Verbindung mit eigener Network Loop und
-automatischem Reconnect. Serielles Lesen wird von einem Broker-Ausfall nicht
-blockiert; höchstens die neueste Messung bleibt zum Senden vorgemerkt.
+The service maintains exactly one Paho connection with its own network loop
+and automatic reconnect. A broker outage does not block serial reading; at
+most the most recent measurement remains queued for publishing.
 
-- State: `<topic-prefix>/state`, QoS 1, nicht retained
+- State: `<topic-prefix>/state`, QoS 1, not retained
 - Availability: `<topic-prefix>/availability`, QoS 1, retained Last Will
 - Discovery: `<discovery-prefix>/sensor/<device-id>/<sensor>/config`, QoS 1,
   retained
-- Home-Assistant-Birth: `<discovery-prefix>/status`
-- Sensor-Timeout: `expire_after` 30 Sekunden
+- Home Assistant birth: `<discovery-prefix>/status`
+- Sensor timeout: `expire_after` 30 seconds
 
-Beispiel für eine State-Nachricht:
+Example state message:
 
 ```json
 {
@@ -268,7 +266,7 @@ Beispiel für eine State-Nachricht:
 }
 ```
 
-## Entwicklung
+## Development
 
 ```console
 python3 -m venv .venv
@@ -278,29 +276,28 @@ python3 -m venv .venv
 .venv/bin/mypy src
 ```
 
-Die Tests benötigen keine Hardware oder Netzwerkdienste. Sie prüfen Framing,
-OBIS, Skalierung, MQTT und Discovery und entschlüsseln den öffentlichen
-Netz-NÖ-Beispielrahmen. GitHub Actions führt die Prüfungen mit Python 3.11 bis
-3.14 aus.
+Tests need neither hardware nor network services. They cover framing, OBIS,
+scaling, MQTT and discovery, and decrypt the public Netz NÖ sample frame.
+GitHub Actions runs them on Python 3.11 through 3.14.
 
-## Technische Details
+## Technical details
 
-### Protokoll und Robustheit
+### Protocol and resilience
 
-- wired M-Bus, 2400 Baud, 8N1, unidirektional
-- M-Bus-Long-Frames `68 LL LL 68 ... checksum 16`
-- DLMS/COSEM Security Suite 0 mit individuellem 16-Byte-GUEK
-- Push-Intervall ungefähr fünf Sekunden
-- Entschlüsselung und Fragmentzusammenführung mit `gurux-dlms`
-- Interpretation anhand von OBIS statt fester XML-Positionen
+- wired M-Bus, 2400 baud, 8N1, unidirectional
+- M-Bus long frames `68 LL LL 68 ... checksum 16`
+- DLMS/COSEM Security Suite 0 with the individual 16-byte GUEK
+- push interval of approximately five seconds
+- decryption and fragment assembly using `gurux-dlms`
+- interpretation by OBIS code instead of fixed XML positions
 
-Der Streaming-Framer verarbeitet fragmentierte Reads, mehrere Frames pro Read,
-Datenmüll und beschädigte Frames. Er prüft Länge, Prüfsumme und Endbyte und
-öffnet den Port nach Verbindungsfehlern mit exponentiellem Backoff erneut.
+The streaming framer handles fragmented reads, multiple frames per read, noise
+and corrupt frames. It validates length, checksum and end byte, and reopens the
+port with exponential backoff after connection failures.
 
-### Unterstützte OBIS-Werte
+### Supported OBIS values
 
-| JSON-Feld | OBIS | Einheit |
+| JSON field | OBIS | Unit |
 | --- | --- | --- |
 | `energy_import_wh` | `1.0.1.8.0.255` | Wh |
 | `energy_export_wh` | `1.0.2.8.0.255` | Wh |
@@ -314,28 +311,27 @@ Datenmüll und beschädigte Frames. Er prüft Länge, Prüfsumme und Endbyte und
 | `current_l3_a` | `1.0.71.7.0.255` | A |
 | `power_factor` | `1.0.13.7.0.255` | - |
 
-Zeitstempel und Zählernummer werden ebenfalls gelesen. Skalierer und Einheit
-stammen aus dem COSEM-Datensatz. Fehlende oder unbekannte OBIS-Werte beenden
-den Dienst nicht.
+The timestamp and meter number are read as well. The scaler and unit come from
+the COSEM data set. Missing or unknown OBIS values do not stop the service.
 
-### Annahmen zum Kaifa-Frame
+### Kaifa frame assumptions
 
-Der öffentliche Netz-NÖ-Beispielpush umfasst 282 Byte und besteht aus zwei
-M-Bus-Long-Frames: `68 FA FA 68` mit 256 Byte und `68 14 14 68` mit 26 Byte.
-Der zusammengesetzte PDU enthält einen 8-Byte-System-Title, Security Control
-`0x20` für Security Suite 0, einen 32-Bit-Frame-Counter in Big-Endian und die
-verschlüsselten Daten. Netz NÖ verwendet dabei keinen Authentication Key.
+The public Netz NÖ sample push is 282 bytes long and consists of two M-Bus
+long frames: `68 FA FA 68` with 256 bytes and `68 14 14 68` with 26 bytes. The
+assembled PDU contains an 8-byte system title, Security Control `0x20` for
+Security Suite 0, a big-endian 32-bit frame counter and the encrypted data.
+Netz NÖ does not use an authentication key for this format.
 
-Diese Annahmen werden mit dem öffentlichen Beispiel getestet. Reale
-Zählerstände, System Titles und Frame Counter sind nicht fest codiert.
+These assumptions are tested against the public sample. Real meter readings,
+system titles and frame counters are not hard-coded.
 
-## Quellen
+## Sources
 
-- [Netz NÖ: Smart Meter Kundenschnittstelle P1, 6. Auflage, März 2026](https://netz-noe.at/getContentAsset/568bef9a-3bd1-4f2e-a710-6ba7e71cb746/0ee16eb8-9692-4f25-b8a4-d007b35915a4/218_20_SM_Kundenschnittstelle_WCAG.pdf?language=de)
+- [Netz NÖ: Smart Meter customer interface P1, 6th edition, March 2026](https://netz-noe.at/getContentAsset/568bef9a-3bd1-4f2e-a710-6ba7e71cb746/0ee16eb8-9692-4f25-b8a4-d007b35915a4/218_20_SM_Kundenschnittstelle_WCAG.pdf?language=de)
 - [Gurux DLMS Python](https://github.com/Gurux/Gurux.DLMS.Python)
 - [Paho MQTT Python Client](https://eclipse.dev/paho/files/paho.mqtt.python/html/client.html)
 - [Home Assistant MQTT](https://www.home-assistant.io/integrations/mqtt/)
 
-## Lizenz
+## License
 
-GPL-2.0-only, siehe [LICENSE](LICENSE).
+GPL-2.0-only, see [LICENSE](LICENSE).

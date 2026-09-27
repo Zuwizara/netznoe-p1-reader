@@ -28,21 +28,21 @@ class SensorDefinition:
 
 
 SENSORS = (
-    SensorDefinition("timestamp", "Zeitstempel", "timestamp"),
-    SensorDefinition("energy_import_wh", "Wirkenergie Bezug", "energy", "total_increasing", "Wh"),
+    SensorDefinition("timestamp", "Timestamp", "timestamp"),
+    SensorDefinition("energy_import_wh", "Energy import", "energy", "total_increasing", "Wh"),
     SensorDefinition(
-        "energy_export_wh", "Wirkenergie Einspeisung", "energy", "total_increasing", "Wh"
+        "energy_export_wh", "Energy export", "energy", "total_increasing", "Wh"
     ),
-    SensorDefinition("power_import_w", "Momentanleistung Bezug", "power", "measurement", "W"),
-    SensorDefinition("power_export_w", "Momentanleistung Einspeisung", "power", "measurement", "W"),
-    SensorDefinition("voltage_l1_v", "Spannung L1", "voltage", "measurement", "V"),
-    SensorDefinition("voltage_l2_v", "Spannung L2", "voltage", "measurement", "V"),
-    SensorDefinition("voltage_l3_v", "Spannung L3", "voltage", "measurement", "V"),
-    SensorDefinition("current_l1_a", "Strom L1", "current", "measurement", "A"),
-    SensorDefinition("current_l2_a", "Strom L2", "current", "measurement", "A"),
-    SensorDefinition("current_l3_a", "Strom L3", "current", "measurement", "A"),
-    SensorDefinition("power_factor", "Leistungsfaktor", "power_factor", "measurement"),
-    SensorDefinition("meter_number", "Zählernummer"),
+    SensorDefinition("power_import_w", "Power import", "power", "measurement", "W"),
+    SensorDefinition("power_export_w", "Power export", "power", "measurement", "W"),
+    SensorDefinition("voltage_l1_v", "Voltage L1", "voltage", "measurement", "V"),
+    SensorDefinition("voltage_l2_v", "Voltage L2", "voltage", "measurement", "V"),
+    SensorDefinition("voltage_l3_v", "Voltage L3", "voltage", "measurement", "V"),
+    SensorDefinition("current_l1_a", "Current L1", "current", "measurement", "A"),
+    SensorDefinition("current_l2_a", "Current L2", "current", "measurement", "A"),
+    SensorDefinition("current_l3_a", "Current L3", "current", "measurement", "A"),
+    SensorDefinition("power_factor", "Power factor", "power_factor", "measurement"),
+    SensorDefinition("meter_number", "Meter number"),
 )
 
 
