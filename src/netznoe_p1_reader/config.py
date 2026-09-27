@@ -59,6 +59,16 @@ class SerialConfig:
     reconnect_min_seconds: float = 1.0
     reconnect_max_seconds: float = 30.0
 
+    @classmethod
+    def from_env(cls, env: Mapping[str, str] | None = None) -> SerialConfig:
+        source = os.environ if env is None else env
+        return cls(
+            port=_value(source, "SERIAL_PORT", "/dev/ttyUSB0"),
+            baudrate=_integer(source, "SERIAL_BAUDRATE", 2400, minimum=300, maximum=115200),
+            timeout=_integer(source, "SERIAL_TIMEOUT_MS", 1000, minimum=100, maximum=10000)
+            / 1000,
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class MqttConfig:
@@ -136,12 +146,7 @@ class AppConfig:
             raise ConfigError(f"{PREFIX}LOG_LEVEL is invalid")
 
         return cls(
-            serial=SerialConfig(
-                port=_value(source, "SERIAL_PORT", "/dev/ttyUSB0"),
-                baudrate=_integer(source, "SERIAL_BAUDRATE", 2400, minimum=300, maximum=115200),
-                timeout=_integer(source, "SERIAL_TIMEOUT_MS", 1000, minimum=100, maximum=10000)
-                / 1000,
-            ),
+            serial=SerialConfig.from_env(source),
             mqtt=MqttConfig(
                 host=_value(source, "MQTT_HOST", "localhost"),
                 port=_integer(source, "MQTT_PORT", 8883 if tls else 1883, minimum=1, maximum=65535),
