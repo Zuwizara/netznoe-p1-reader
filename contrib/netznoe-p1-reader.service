@@ -1,0 +1,22 @@
+[Unit]
+Description=Netz NÖ P1 smart-meter reader
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=netznoe-p1-reader
+Group=netznoe-p1-reader
+SupplementaryGroups=dialout
+EnvironmentFile=/etc/netznoe-p1-reader.env
+WorkingDirectory=/opt/netznoe-p1-reader
+ExecStart=/opt/netznoe-p1-reader/.venv/bin/netznoe-p1-reader
+Restart=on-failure
+RestartSec=5s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target

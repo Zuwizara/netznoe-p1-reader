@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netznoe-p1-reader"
+version = "0.1.0"
+description = "Read encrypted Netz NÖ P1 smart-meter data and publish it via MQTT."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "GPL-2.0-only"
+authors = [{ name = "netznoe-p1-reader contributors" }]
+dependencies = [
+  "gurux-dlms>=1.0.203,<2",
+  "paho-mqtt>=2.1,<3",
+  "pyserial>=3.5,<4",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.17,<2",
+  "pytest>=8.3,<9",
+  "ruff>=0.12,<1",
+]
+
+[project.scripts]
+netznoe-p1-reader = "netznoe_p1_reader.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["gurux_dlms.*", "serial.*"]
+ignore_missing_imports = true
