@@ -1,5 +1,7 @@
 # netznoe-p1-reader
 
+Deutsch | [English](README.en.md)
+
 [![CI](https://github.com/Zuwizara/netznoe-p1-reader/actions/workflows/ci.yml/badge.svg)](https://github.com/Zuwizara/netznoe-p1-reader/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/tag/Zuwizara/netznoe-p1-reader)](https://github.com/Zuwizara/netznoe-p1-reader/tags)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
